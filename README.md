@@ -81,7 +81,7 @@ Etter første gang åpner du den som vanlig.
 
 ---
 
-## Tilpasning
+<!--## Tilpasning
 
 ### Bytte ikon
 Erstatt `Resources/app-icon.png` med en kvadratisk PNG (1024×1024 anbefalt),
@@ -112,7 +112,7 @@ let purpleStart = Color(red: 0.46, green: 0.20, blue: 0.93)
 let purpleEnd   = Color(red: 0.36, green: 0.27, blue: 0.95)
 let greenAccent = Color(red: 0.13, green: 0.70, blue: 0.31)
 ```
-
+-->
 ---
 
 ## Tekniske detaljer
