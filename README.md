@@ -1,7 +1,7 @@
 # Gimme SVG
 
 <p align="center">
-  <img src="Resources/logo.svg" width="220" alt="Gimme SVG logo">
+  <img src="Resources/logo-full.svg" width="220" alt="Gimme SVG logo">
 </p>
 
 En liten native Mac-app som finner og laster ned alle SVG-bilder fra en
