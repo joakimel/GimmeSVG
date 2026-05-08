@@ -181,3 +181,4 @@ mottakere bygge selv med `./build.sh`.
 ## Lisens / opphav
 
 Bygd som internt verktøy. Bruk fritt.
+
