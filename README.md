@@ -10,6 +10,15 @@ nettside. Lim inn en URL → trykk Søk → velg ut SVGer du vil ha → last ned
 Bygd i SwiftUI med kun innebygde Apple-rammeverk – ingen tredjeparts
 avhengigheter.
 
+**Repo:** https://github.com/joakimel/GimmeSVG
+
+```bash
+git clone https://github.com/joakimel/GimmeSVG.git
+cd GimmeSVG
+./build.sh
+open ~/Desktop/"Gimme SVG.app"
+```
+
 ---
 
 ## Funksjoner
