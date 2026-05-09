@@ -1,7 +1,7 @@
 # Gimme SVG
 
 <p align="center">
-  <img src="Resources/logo-full.svg" width="220" alt="Gimme SVG logo">
+  <img src="Resources/gs_full_logo_v3.svg" width="260" alt="Gimme SVG logo">
 </p>
 
 En liten native Mac-app som finner og laster ned alle SVG-bilder fra en
@@ -23,22 +23,35 @@ open ~/Desktop/"Gimme SVG.app"
 
 ## Funksjoner
 
-- **Henter alt** – inline `<svg>`-tagger, `<img src="*.svg">`, `<object data>`,
-  `<use href>`, CSS-bakgrunner (`url(*.svg)`), og direktelenker
+- **Henter alt** – inline `<svg>`-tagger (inkl. nested), `<img src="*.svg">`,
+  `<object data>`, `<use href>`, CSS-bakgrunner (`url(*.svg)`), og
+  direktelenker. HTML-kommentarer og `<script>`-blokker ignoreres så
+  ekstrahering blir robust på vilkårlige nettsider.
 - **Forhåndsvisning** – hver SVG vises rendret som bilde i et grid
 - **Multi-select** – klikk på kort for å velge/avvelge, «Velg alle» for alt
 - **Last ned utvalgte** – velg mappe via systemets standard `NSOpenPanel`,
   Finder åpnes automatisk når lagring er ferdig
 - **Server-side henting** – appen gjør HTTP-kallene selv, så CORS er ikke
   et problem som ved en ren nettside-løsning
+- **9 språk** – norsk, engelsk, tysk, fransk, spansk, svensk, dansk,
+  forenklet kinesisk, japansk. Settes automatisk fra systemspråket ved
+  første oppstart, kan overstyres via språkvelgeren i headeren.
+- **Søkehistorikk** – de 10 siste søkene huskes med URL, tidspunkt og
+  hele SVG-innholdet. «Se resultater» åpner cachen umiddelbart uten
+  nytt nettverkskall. «Tøm historikk» med bekreftelse fjerner alt.
 
 ## Skjermbilde / design
 
-- Lilla gradient-header med logo (`#7533ED → #5C45F2`)
-- URL-felt + lilla «Søk»-knapp med forstørrelsesglass-ikon
-- Tom-tilstand med stort lilla forstørrelsesglass
-- Grid med valgbare kort (lilla ramme på valgte)
+- Blå-til-lilla gradient-header med whitened v3-logo og en hvit pille for
+  språkvelger (globe + språk + chevron) øverst til høyre
+- Tab-bar under headeren: «Søk» og «Historikk» (sistnevnte med gult
+  badge når det finnes lagrede søk)
+- URL-felt + blå «Søk»-knapp med forstørrelsesglass-ikon
+- Tom-tilstand med stort blått forstørrelsesglass
+- Grid med valgbare kort (blå ramme på valgte)
 - Grønn «Last ned (N)»-knapp i øverste høyre hjørne av resultatlista
+- Historikk-tab viser søk som kort med URL, antall SVG-er, tidspunkt
+  og «Se resultater»-knapp. «Tøm historikk» øverst til høyre.
 
 ---
 
@@ -46,15 +59,18 @@ open ~/Desktop/"Gimme SVG.app"
 
 ```
 Gimme SVG/
-├── README.md                     ← denne fila
-├── build.sh                      ← én kommando, bygger ferdig .app
+├── README.md                          ← denne fila
+├── CLAUDE.md                          ← kontekst for AI-assistenter
+├── DEVELOPMENT.md                     ← utviklingshistorikk + iterasjoner
+├── build.sh                           ← én kommando, bygger ferdig .app
 ├── Sources/
-│   ├── main.swift                ← hele appen (SwiftUI + AppKit)
-│   └── build_resources.swift     ← (valgfri) WKWebView-basert SVG→ikon-bygger
+│   ├── main.swift                     ← hele appen (SwiftUI + AppKit)
+│   └── build_resources.swift          ← (valgfri) WKWebView-basert SVG→ikon-bygger
 └── Resources/
-    ├── app-icon.png              ← kilde-ikon (1024×1024 anbefalt)
-    ├── logo-full.svg             ← original logo (svart/hvit blanding)
-    └── logo.svg                  ← whitened logo brukt i header
+    ├── gs_appicon_v3.png              ← app-ikon (880×880, brukes av build.sh)
+    ├── gs_appicon_v3.svg              ← vector-kilde for ikonet
+    ├── gs_full_logo_v3.svg            ← logo (outlinet, ingen font-avhengighet)
+    └── gs_full_logo_v3_white.svg      ← whitened logo brukt i header
 ```
 
 Bygd app havner som standard på `~/Desktop/Gimme SVG.app`.
@@ -129,12 +145,15 @@ let greenAccent = Color(red: 0.13, green: 0.70, blue: 0.31)
 ### Arkitektur
 | Lag | Implementasjon |
 |---|---|
-| **UI** | SwiftUI (`ContentView`, `SVGCard`, `SVGPreview`) i `NSHostingView` |
+| **UI** | SwiftUI (`ContentView`, `SVGCard`, `SVGPreview`, `HistoryListView`, `LanguagePicker`) i `NSHostingView` |
 | **App-skall** | Direkte `NSApplication` + `AppDelegate` (ikke `@main`-makro) |
+| **App-tilstand** | `class AppState: ObservableObject` for språk, historikk, aktiv tab |
+| **Lokalisering** | `enum AppLanguage` + `struct Strings` (9 språk, in-source) |
 | **Nettverk** | `URLSession.shared.data(for:)` med async/await |
-| **HTML-parsing** | `NSRegularExpression` mot HTML-strengen |
-| **SVG-rendering** | `NSImage(data:)` for previews; `WKWebView`-snapshot for ikon-bygging |
+| **HTML-parsing** | Pre-prosessering (strip kommentarer/script) + stack-basert finder for inline SVG, regex for eksterne referanser |
+| **SVG-rendering** | `NSImage(data:)` for previews; `WKWebView`-snapshot for ikon-bygging (reserve) |
 | **Lagring** | `NSOpenPanel` for mappevalg, `String.write(to:)` for filer |
+| **Persistens** | `UserDefaults` for språk, JSON i `~/Library/Application Support/Gimme SVG/history.json` for historikk |
 | **Pakking** | Manuelt bygget `.app`-bundle med `Info.plist`, ad-hoc `codesign` |
 
 ### Hvorfor ikke Xcode-prosjekt?

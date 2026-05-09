@@ -35,8 +35,8 @@ cat > "$DEST_APP/Contents/Info.plist" <<'PLIST'
     <key>CFBundleName</key>           <string>Gimme SVG</string>
     <key>CFBundleDisplayName</key>    <string>Gimme SVG</string>
     <key>CFBundleIdentifier</key>     <string>no.elden.gimmesvg</string>
-    <key>CFBundleVersion</key>        <string>1.0</string>
-    <key>CFBundleShortVersionString</key><string>1.0</string>
+    <key>CFBundleVersion</key>        <string>5</string>
+    <key>CFBundleShortVersionString</key><string>1.3.0</string>
     <key>CFBundlePackageType</key>    <string>APPL</string>
     <key>CFBundleExecutable</key>     <string>GimmeSVG</string>
     <key>CFBundleIconFile</key>       <string>AppIcon</string>
@@ -51,14 +51,14 @@ cat > "$DEST_APP/Contents/Info.plist" <<'PLIST'
 </plist>
 PLIST
 
-# 4. Kopier hvit logo som ressurs
-cp Resources/logo.svg "$DEST_APP/Contents/Resources/logo.svg"
+# 4. Kopier hvit logo som ressurs (whitened v3-utgave for lilla header)
+cp Resources/gs_full_logo_v3_white.svg "$DEST_APP/Contents/Resources/logo.svg"
 
 # 5. Bygg AppIcon.icns fra Resources/app-icon.png
 echo "  • Bygger AppIcon.icns …"
 ICONSET="$BUILD_DIR/AppIcon.iconset"
 mkdir -p "$ICONSET"
-sips -z 1024 1024 Resources/app-icon.png --out "$ICONSET/_master.png" >/dev/null
+sips -z 1024 1024 Resources/gs_appicon_v3.png --out "$ICONSET/_master.png" >/dev/null
 
 for spec in "16:icon_16x16.png"      "32:icon_16x16@2x.png" \
             "32:icon_32x32.png"      "64:icon_32x32@2x.png" \

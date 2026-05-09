@@ -57,6 +57,19 @@ Detaljer i [DEVELOPMENT.md](DEVELOPMENT.md).
 - **Quarantine-attributtet** stopper ad-hoc-signerte apper sendt via
   Slack/AirDrop på macOS 15+. Mottakere må kjøre
   `xattr -cr "Gimme SVG.app"`.
+- **`accentColor` er reservert** av SwiftUI som view-modifier. Den globale
+  konstanten i `main.swift` heter derfor `appAccent`. Ikke gi en farge
+  navnet `accentColor` – kompilatoren vil tolke det som metoden og gi
+  «cannot convert (Color?) -> some View» rundt om i fila.
+- **`Menu` med `.menuStyle(.borderlessButton)` på macOS stripper bort
+  `.background`/`.shadow` på label-en.** Språkvelgeren bruker derfor en
+  vanlig `Button` + `.popover` med egne radvisninger. Ikke bytt tilbake
+  til `Menu` for headers eller andre elementer der pillen må synes.
+- **HTML-parsing er regex-basert med stack-finder.** Pre-prosessering
+  fjerner `<!-- … -->` og `<script>…</script>` for å unngå falske treff.
+  Inline `<svg>…</svg>` finnes med stack-basert teller (ikke non-greedy
+  regex), så nested SVG håndteres. CSS `url(*.svg)` plukkes opp – derfor
+  beholdes `<style>`-blokker.
 
 ## Brukerens kontekst
 
@@ -76,8 +89,21 @@ Detaljer i [DEVELOPMENT.md](DEVELOPMENT.md).
 ## Hvor finner jeg
 
 - App-skjelett, vinduet, menyen → bunnen av `main.swift` (`AppDelegate`)
-- UI / SwiftUI-views → `ContentView`, `SVGCard`, `SVGPreview` i `main.swift`
-- HTML/SVG-parsing → `enum SVGExtractor` i `main.swift`
-- Ikon-bygging fra PNG → `build.sh` (sips + iconutil)
+- App-tilstand (språk, historikk, aktiv tab) → `class AppState` i `main.swift`
+  (`ObservableObject`, injiseres med `.environmentObject` av AppDelegate)
+- Lokalisering → `enum AppLanguage` (9 språk) + `struct Strings` med én
+  `switch`-blokk per UI-streng. `AppLanguage.detectFromSystem()` matcher
+  brukerens systemspråk ved første oppstart, faller tilbake til engelsk.
+- Persistens av historikk → `~/Library/Application Support/Gimme SVG/history.json`
+  (JSON-encodet `[HistoryEntry]`, maks 10 entries, samme URL erstatter
+  gammelt innslag i stedet for å duplisere)
+- UI / SwiftUI-views → `ContentView`, `SVGCard`, `SVGPreview`,
+  `HistoryListView`, `LanguagePicker`, `LanguageRow` i `main.swift`
+- HTML/SVG-parsing → `enum SVGExtractor` i `main.swift` (pre-prosessering
+  + stack-basert finder for inline SVG, regex for eksterne referanser)
+- Ikon-bygging fra PNG → `build.sh` (sips + iconutil) – kilde:
+  `Resources/gs_appicon_v3.png`
+- Header-logo → `Resources/gs_full_logo_v3_white.svg` (whitened utgave
+  av `gs_full_logo_v3.svg`, generert via `sed 's|<svg |<svg fill="#ffffff" |'`)
 - Ikon-bygging fra SVG → `Sources/build_resources.swift` (WKWebView-snapshot,
   brukes ikke av `build.sh` p.t. men beholdt som reserve)
